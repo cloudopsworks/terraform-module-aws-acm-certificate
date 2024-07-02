@@ -23,7 +23,6 @@ resource "aws_route53_record" "cross_cert_validation" {
 }
 
 resource "aws_acm_certificate_validation" "cross_cert_validation" {
-  provider                = aws.cross_account
   count                   = var.cross_account == true ? 1 : 0
   certificate_arn         = aws_acm_certificate.this.arn
   validation_record_fqdns = [for record in aws_route53_record.cross_cert_validation : record.fqdn]
