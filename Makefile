@@ -2,10 +2,7 @@ SHELL := /bin/bash
 TRONADOR_AUTO_INIT := true
 define PROVIDER_CHOMP
 provider "aws" {
-  alias = "default"
-}
-provider "aws" {
-  alias = "account"
+  alias = "cross_account"
 }
 endef
 export PROVIDER_CHOMP
