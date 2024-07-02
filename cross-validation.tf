@@ -11,7 +11,7 @@ resource "aws_route53_record" "cross_cert_validation" {
       name   = dvo.resource_record_name
       record = dvo.resource_record_value
       type   = dvo.resource_record_type
-    } if contains(dvo.domain_name, var.domain_zone) && var.cross_account == true
+    } if endswith(dvo.domain_name, var.domain_zone) && var.cross_account == true
   }
 
   allow_overwrite = true
