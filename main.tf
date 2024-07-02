@@ -10,7 +10,7 @@ locals {
 
 resource "aws_acm_certificate" "this" {
   domain_name               = local.domain_name
-  subject_alternative_names = var.domain_aliases
+  subject_alternative_names = var.domain_alternates
   validation_method         = "DNS"
 
   tags = local.all_tags

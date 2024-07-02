@@ -16,8 +16,8 @@ variable "domain_zone" {
   default     = "example.com"
 }
 
-variable "domain_aliases" {
-  description = "The domain aliases to use for the Certificate domain"
+variable "domain_alternates" {
+  description = "The domain alternate aliases to use for the Certificate domain"
   type        = list(string)
   default     = []
 }
