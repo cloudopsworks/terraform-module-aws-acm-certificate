@@ -29,7 +29,7 @@ variable "cross_account" {
 }
 
 variable "private_zone" {
-    description = "Required to search the Route53 zone in a private zone. Defaults to false"
-    type        = bool
-    default     = false
+  description = "Required to search the Route53 zone in a private zone. Defaults to false"
+  type        = bool
+  default     = false
 }
