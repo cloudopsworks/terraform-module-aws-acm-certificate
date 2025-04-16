@@ -10,7 +10,7 @@ resource "aws_route53_record" "local_cert_validation" {
       name   = dvo.resource_record_name
       record = dvo.resource_record_value
       type   = dvo.resource_record_type
-    } if endswith(dvo.domain_name, var.domain_zone) && var.cross_account != true
+    } if endswith(dvo.domain_name, var.domain_zone) && var.cross_account != true && var.external_dns_zone == false
   }
 
   allow_overwrite = true
@@ -22,7 +22,7 @@ resource "aws_route53_record" "local_cert_validation" {
 }
 
 resource "aws_acm_certificate_validation" "local_cert_validation" {
-  count                   = var.cross_account != true ? 1 : 0
+  count                   = var.cross_account != true && var.external_dns_zone == false ? 1 : 0
   certificate_arn         = aws_acm_certificate.this.arn
   validation_record_fqdns = [for record in aws_route53_record.local_cert_validation : record.fqdn]
 }

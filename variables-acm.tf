@@ -33,3 +33,9 @@ variable "private_zone" {
   type        = bool
   default     = false
 }
+
+variable "external_dns_zone" {
+  description = "(optional) allows the module work with external record validation out of Route53, defaults to false"
+  type        = bool
+  default     = false
+}
