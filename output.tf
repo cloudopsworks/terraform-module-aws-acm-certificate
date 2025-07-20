@@ -12,19 +12,20 @@ output "acm_certificate_arn" {
     aws_acm_certificate_validation.local_cert_validation[0].certificate_arn,
     aws_acm_certificate.this[0].arn,
     aws_acm_certificate.imported[0].arn,
-    aws_acm_certificate.internal[0].arn
+    aws_acm_certificate.internal[0].arn,
+    null
   )
 }
 
 output "acm_certificate_validation_options" {
-  value = var.external_dns_zone == true && var.certificate_type == "external" ? aws_acm_certificate.this[0].domain_validation_options : null
+  value = var.create && var.external_dns_zone == true && var.certificate_type == "external" ? aws_acm_certificate.this[0].domain_validation_options : null
 }
 
 output "acm_certificate_status" {
   value = try(aws_acm_certificate.this[0].status,
     aws_acm_certificate.imported[0].status,
     aws_acm_certificate.internal[0].status,
-    ""
+    null
   )
 }
 
@@ -32,12 +33,14 @@ output "acm_certificate_renewal_elegibility" {
   value = try(aws_acm_certificate.this[0].renewal_eligibility,
     aws_acm_certificate.imported[0].renewal_eligibility,
     aws_acm_certificate.internal[0].renewal_eligibility,
-  "")
+    null
+  )
 }
 
 output "acm_certificate_expire_date" {
   value = try(aws_acm_certificate.this[0].not_after,
     aws_acm_certificate.imported[0].not_after,
     aws_acm_certificate.internal[0].not_after,
-  "")
+    null
+  )
 }

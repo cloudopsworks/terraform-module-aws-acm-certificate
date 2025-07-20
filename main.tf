@@ -12,7 +12,7 @@ locals {
 }
 
 resource "aws_acm_certificate" "this" {
-  count                     = var.certificate_type == "external" ? 1 : 0
+  count                     = var.create && var.certificate_type == "external" ? 1 : 0
   domain_name               = local.domain_name
   subject_alternative_names = var.domain_alternates
   validation_method         = "DNS"
@@ -30,17 +30,17 @@ resource "aws_acm_certificate" "this" {
 }
 
 data "aws_secretsmanager_secret" "imported" {
-  count = var.certificate_type == "imported" ? 1 : 0
+  count = var.create && var.certificate_type == "imported" ? 1 : 0
   name  = var.imported_cert_secret_name
 }
 
 data "aws_secretsmanager_secret_version" "imported" {
-  count     = var.certificate_type == "imported" ? 1 : 0
+  count     = var.create && var.certificate_type == "imported" ? 1 : 0
   secret_id = data.aws_secretsmanager_secret.imported[0].arn
 }
 
 resource "aws_acm_certificate" "imported" {
-  count             = var.certificate_type == "imported" ? 1 : 0
+  count             = var.create && var.certificate_type == "imported" ? 1 : 0
   private_key       = base64decode(jsondecode(data.aws_secretsmanager_secret_version.imported[0].secret_string)["key"])
   certificate_body  = base64decode(jsondecode(data.aws_secretsmanager_secret_version.imported[0].secret_string)["public_key"])
   certificate_chain = base64decode(jsondecode(data.aws_secretsmanager_secret_version.imported[0].secret_string)["cert_chain"])
@@ -58,12 +58,12 @@ resource "aws_acm_certificate" "imported" {
 }
 
 data "aws_acmpca_certificate_authority" "private_ca" {
-  count = var.certificate_type == "internal" ? 1 : 0
+  count = var.create && var.certificate_type == "internal" ? 1 : 0
   arn   = var.internal_ca_arn
 }
 
 resource "aws_acm_certificate" "internal" {
-  count                     = var.certificate_type == "internal" ? 1 : 0
+  count                     = var.create && var.certificate_type == "internal" ? 1 : 0
   certificate_authority_arn = data.aws_acmpca_certificate_authority.private_ca[0].arn
   domain_name               = local.domain_name
   subject_alternative_names = var.domain_alternates
