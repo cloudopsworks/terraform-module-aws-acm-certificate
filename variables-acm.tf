@@ -7,6 +7,13 @@
 #     Distributed Under Apache v2.0 License
 #
 
+variable "create" {
+  description = "Flag to create the ACM certificate. Defaults to true."
+  type        = bool
+  default     = true
+  nullable    = false
+}
+
 variable "certificate_type" {
   description = "The type of ACM certificate to create, either 'internal', 'external' or 'imported'. Defaults to 'external'."
   type        = string

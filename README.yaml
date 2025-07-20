@@ -8,23 +8,128 @@ copyrights:
     url: "https://cloudops.works"
     year: "2024"
 
-github_repo: cloudopsworks/terraform-module-aws-vpc-setup
+github_repo: cloudopsworks/terraform-module-aws-acm-certificate
 
 description: |-
-  VPC Module for setting up ACM Certificate with support of cross account setting.
+  AWS Certificate Manager (ACM) module for managing SSL/TLS certificates with support for external, imported, and internal certificate types. Features include cross-account certificate management, DNS validation, and private CA integration.
 
 # Introduction to the project
-#introduction: |-
-#  This is an introduction.
+introduction: |-
+  This Terraform module provides a comprehensive solution for managing SSL/TLS certificates in AWS Certificate Manager (ACM). It supports three certificate types:
+  - External certificates with DNS validation
+  - Imported certificates from external sources
+  - Internal certificates using Private Certificate Authority
+
+  The module includes features such as cross-account certificate management, automatic DNS validation, and flexible configuration options for certificate transparency and exportability.
 
 # How to use this project
-#usage: |-
+usage: |-
+  The module can be configured using the following variables:
+
+  ```yaml
+  certificate_type:
+    description: "Type of certificate to create (external/imported/internal)"
+    type: string
+    required: true
+
+  domain_zone:
+    description: "Main domain zone for the certificate"
+    type: string
+    required: true
+
+  domain_alias:
+    description: "Subdomain prefix (optional)"
+    type: string
+    default: ""
+
+  domain_alternates:
+    description: "List of alternative domain names"
+    type: list(string)
+    default: []
+
+  cross_account:
+    description: "Enable cross-account certificate management"
+    type: bool
+    default: false
+
+  options:
+    description: "Certificate options configuration"
+    type: map
+    default: {}
+    # certificate_transparency: bool
+    # exportable: bool
+  ```
 
 # Example usage
-#examples: |-
+examples: |-
+  External Certificate with DNS Validation:
+  ```hcl
+  module "web_certificate" {
+    source = "cloudopsworks/terraform-module-aws-acm-certificate"
+
+    certificate_type = "external"
+    domain_zone     = "example.com"
+    domain_alias    = "www"
+    domain_alternates = ["api.example.com", "*.example.com"]
+
+    options = {
+      certificate_transparency = true
+      exportable = false
+    }
+  }
+  ```
+
+  Imported Certificate:
+  ```hcl
+  module "imported_cert" {
+    source = "cloudopsworks/terraform-module-aws-acm-certificate"
+
+    certificate_type = "imported"
+    domain_zone     = "example.com"
+    imported_cert_secret_name = "my-imported-cert"
+  }
+  ```
+
+  Internal Certificate with Private CA:
+  ```hcl
+  module "internal_cert" {
+    source = "cloudopsworks/terraform-module-aws-acm-certificate"
+
+    certificate_type = "internal"
+    domain_zone     = "internal.example.com"
+    internal_ca_arn = "arn:aws:acm-pca:region:account:certificate-authority/12345678-1234-1234-1234-123456789012"
+  }
+  ```
 
 # How to get started quickly
-#quickstart: |-
+quickstart: |-
+  1. Add the module to your Terraform configuration:
+     ```hcl
+     module "certificate" {
+       source = "cloudopsworks/terraform-module-aws-acm-certificate"
+
+       certificate_type = "external"
+       domain_zone     = "example.com"
+       domain_alias    = "www"
+     }
+     ```
+
+  2. Initialize Terraform:
+     ```bash
+     terraform init
+     ```
+
+  3. Review the planned changes:
+     ```bash
+     terraform plan
+     ```
+
+  4. Apply the configuration:
+     ```bash
+     terraform apply
+     ```
+
+  5. Wait for DNS validation to complete (for external certificates)
 
 include:
   - "docs/targets.md"
