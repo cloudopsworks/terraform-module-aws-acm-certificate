@@ -17,6 +17,13 @@ resource "aws_acm_certificate" "this" {
   subject_alternative_names = var.domain_alternates
   validation_method         = "DNS"
   tags                      = local.all_tags
+  dynamic "options" {
+    for_each = length(var.options) > 0 ? [1] : []
+    content {
+      certificate_transparency_logging_preference = var.options.certificate_transparency ? "ENABLED" : "DISABLED"
+      export                                      = var.options.exportable ? "ENABLED" : "DISABLED"
+    }
+  }
   lifecycle {
     create_before_destroy = true
   }
@@ -38,6 +45,13 @@ resource "aws_acm_certificate" "imported" {
   certificate_body  = base64decode(jsondecode(data.aws_secretsmanager_secret_version.imported[0].secret_string)["public_key"])
   certificate_chain = base64decode(jsondecode(data.aws_secretsmanager_secret_version.imported[0].secret_string)["cert_chain"])
   tags              = local.all_tags
+  dynamic "options" {
+    for_each = length(var.options) > 0 ? [1] : []
+    content {
+      certificate_transparency_logging_preference = var.options.certificate_transparency ? "ENABLED" : "DISABLED"
+      export                                      = var.options.exportable ? "ENABLED" : "DISABLED"
+    }
+  }
   lifecycle {
     create_before_destroy = true
   }
@@ -55,6 +69,13 @@ resource "aws_acm_certificate" "internal" {
   subject_alternative_names = var.domain_alternates
   early_renewal_duration    = var.early_renewal_days > 0 ? format("P%sD", var.early_renewal_days) : null
   tags                      = local.all_tags
+  dynamic "options" {
+    for_each = length(var.options) > 0 ? [1] : []
+    content {
+      certificate_transparency_logging_preference = var.options.certificate_transparency ? "ENABLED" : "DISABLED"
+      export                                      = var.options.exportable ? "ENABLED" : "DISABLED"
+    }
+  }
   lifecycle {
     create_before_destroy = true
   }

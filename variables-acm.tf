@@ -61,7 +61,7 @@ variable "external_dns_zone" {
 }
 
 variable "early_renewal_days" {
-  description = "The duration in days before the certificate expires to start early renewal. Defaults to 30 days."
+  description = "The duration in days before the certificate expires to start early renewal, only available for internal Certs. Defaults to 30 days."
   type        = string
   default     = 0
   nullable    = false
@@ -78,5 +78,16 @@ variable "internal_ca_arn" {
   description = "The ARN of the internal CA to use for the Certificate domain, if not provided, a new CA will be created."
   type        = string
   default     = ""
+  nullable    = false
+}
+
+# Options for certificate - YAML
+# options:
+#   certificate_transparency: true | false # (optional) Enable certificate transparency logging for the ACM certificate.
+#   exportable: true | false               # (optional) Make the ACM certificate exportable.
+variable "options" {
+  description = "Additional options for the ACM certificate, such as tags and validation methods."
+  type        = any
+  default     = {}
   nullable    = false
 }
