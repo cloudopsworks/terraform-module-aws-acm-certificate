@@ -8,13 +8,13 @@
 #
 
 data "aws_route53_zone" "local_zone" {
-  count        = var.cross_account != true && var.external_dns_zone == false ? 1 : 0
+  count        = var.create && var.cross_account != true && var.external_dns_zone == false ? 1 : 0
   name         = var.domain_zone
   private_zone = var.private_zone
 }
 
 data "aws_route53_zone" "cross_zone" {
-  count        = var.cross_account == true && var.external_dns_zone == false ? 1 : 0
+  count        = var.create && var.cross_account == true && var.external_dns_zone == false ? 1 : 0
   provider     = aws.cross_account
   name         = var.domain_zone
   private_zone = var.private_zone
