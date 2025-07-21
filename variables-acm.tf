@@ -98,3 +98,14 @@ variable "options" {
   default     = {}
   nullable    = false
 }
+
+variable "alerts" {
+  description = "Enable alerts for ACM certificate"
+  type = object({
+    enabled       = optional(bool, false)
+    priority      = optional(number, 3)
+    sns_topic_arn = optional(string, "")
+  })
+  default  = {}
+  nullable = false
+}
