@@ -40,6 +40,7 @@
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
+| <a name="input_alerts"></a> [alerts](#input\_alerts) | Enable alerts for ACM certificate | <pre>object({<br/>    enabled       = optional(bool, false)<br/>    priority      = optional(number, 3)<br/>    sns_topic_arn = optional(string, "")<br/>  })</pre> | `{}` | no |
 | <a name="input_certificate_type"></a> [certificate\_type](#input\_certificate\_type) | The type of ACM certificate to create, either 'internal', 'external' or 'imported'. Defaults to 'external'. | `string` | `"external"` | no |
 | <a name="input_create"></a> [create](#input\_create) | Flag to create the ACM certificate. Defaults to true. | `bool` | `true` | no |
 | <a name="input_cross_account"></a> [cross\_account](#input\_cross\_account) | The cross account to use for the Certificate domain, aws.cross\_account provider must be set to module. | `bool` | `false` | no |
