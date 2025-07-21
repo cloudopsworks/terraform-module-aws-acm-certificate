@@ -13,7 +13,7 @@ locals {
 
 resource "aws_route53_record" "local_cert_validation" {
   for_each = {
-    for dvo in local.domain_validations : dvo => {
+    for dvo in local.domain_validations : dvo.domain_name => {
       name   = dvo.resource_record_name
       record = dvo.resource_record_value
       type   = dvo.resource_record_type
