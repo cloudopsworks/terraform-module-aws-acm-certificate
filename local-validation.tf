@@ -7,9 +7,10 @@
 #     Distributed Under Apache v2.0 License
 #
 
+
 resource "aws_route53_record" "local_cert_validation" {
   for_each = {
-    for dvo in try(aws_acm_certificate.this[0].domain_validation_options, {}) : dvo.domain_name => {
+    for dvo in local.domain_validations : dvo.domain_name => {
       name   = dvo.resource_record_name
       record = dvo.resource_record_value
       type   = dvo.resource_record_type
