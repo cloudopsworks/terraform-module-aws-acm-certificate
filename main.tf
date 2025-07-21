@@ -8,7 +8,8 @@
 #
 
 locals {
-  domain_name = var.domain_alias != "" ? format("%s.%s", var.domain_alias, var.domain_zone) : var.domain_zone
+  domain_name        = var.domain_alias != "" ? format("%s.%s", var.domain_alias, var.domain_zone) : var.domain_zone
+  domain_validations = var.create && var.certificate_type == "external" ? aws_acm_certificate.this[0].domain_validation_options : []
 }
 
 resource "aws_acm_certificate" "this" {
