@@ -7,6 +7,20 @@
 #     Distributed Under Apache v2.0 License
 #
 
+variable "name" {
+  description = "The name of the ACM certificate module, used for naming resources."
+  type        = string
+  default     = ""
+  nullable    = false
+}
+
+variable "name_prefix" {
+  description = "The prefix for the ACM certificate module, used for naming resources."
+  type        = string
+  default     = "managed-cert"
+  nullable    = false
+}
+
 variable "create" {
   description = "Flag to create the ACM certificate. Defaults to true."
   type        = bool

@@ -10,6 +10,9 @@
 locals {
   domain_name        = var.domain_alias != "" ? format("%s.%s", var.domain_alias, var.domain_zone) : var.domain_zone
   domain_validations = var.create && var.certificate_type == "external" ? aws_acm_certificate.this[0].domain_validation_options : []
+  name_tag = {
+    Name = var.name != "" ? var.name : format("%s-%s", var.name_prefix, local.system_name)
+  }
 }
 
 resource "aws_acm_certificate" "this" {
@@ -17,7 +20,7 @@ resource "aws_acm_certificate" "this" {
   domain_name               = local.domain_name
   subject_alternative_names = var.domain_alternates
   validation_method         = "DNS"
-  tags                      = local.all_tags
+  tags                      = merge(local.all_tags, local.name_tag)
   dynamic "options" {
     for_each = length(var.options) > 0 ? [1] : []
     content {
