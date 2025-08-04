@@ -12,7 +12,8 @@ output "acm_certificate_arn" {
     aws_acm_certificate_validation.local_cert_validation[0].certificate_arn,
     aws_acm_certificate.imported[0].arn,
     aws_acm_certificate.internal[0].arn,
-    aws_acm_certificate.this[0].arn
+    aws_acm_certificate.this[0].arn,
+    ""
   )
 }
 
