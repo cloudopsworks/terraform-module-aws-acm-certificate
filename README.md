@@ -322,6 +322,9 @@ Available targets:
   help                                Help screen
   help/all                            Display help for all targets
   help/short                          This help short screen
+  init/aws                            Initialize the project for a specific cloud provider: AWS
+  init/azurerm                        Initialize the project for a specific cloud provider: Azure RM
+  init/gcp                            Initialize the project for a specific cloud provider: GCP
   lint                                Lint terraform/opentofu code
   tag                                 Tag the current version
 
@@ -381,6 +384,8 @@ Available targets:
 | <a name="input_imported_cert_secret_name"></a> [imported\_cert\_secret\_name](#input\_imported\_cert\_secret\_name) | The name of the secret in AWS Secrets Manager where the imported certificate is stored. | `string` | `""` | no |
 | <a name="input_internal_ca_arn"></a> [internal\_ca\_arn](#input\_internal\_ca\_arn) | The ARN of the internal CA to use for the Certificate domain, if not provided, a new CA will be created. | `string` | `""` | no |
 | <a name="input_is_hub"></a> [is\_hub](#input\_is\_hub) | Establish this is a HUB or spoke configuration | `bool` | `false` | no |
+| <a name="input_name"></a> [name](#input\_name) | The name of the ACM certificate module, used for naming resources. | `string` | `""` | no |
+| <a name="input_name_prefix"></a> [name\_prefix](#input\_name\_prefix) | The prefix for the ACM certificate module, used for naming resources. | `string` | `"managed-cert"` | no |
 | <a name="input_options"></a> [options](#input\_options) | Additional options for the ACM certificate, such as tags and validation methods. | `any` | `{}` | no |
 | <a name="input_org"></a> [org](#input\_org) | n/a | <pre>object({<br/>    organization_name = string<br/>    organization_unit = string<br/>    environment_type  = string<br/>    environment_name  = string<br/>  })</pre> | n/a | yes |
 | <a name="input_private_zone"></a> [private\_zone](#input\_private\_zone) | Required to search the Route53 zone in a private zone. Defaults to false | `bool` | `false` | no |
