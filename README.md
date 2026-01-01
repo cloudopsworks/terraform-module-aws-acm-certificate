@@ -340,8 +340,8 @@ Available targets:
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | 6.4.0 |
-| <a name="provider_aws.cross_account"></a> [aws.cross\_account](#provider\_aws.cross\_account) | 6.4.0 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | ~> 6.4 |
+| <a name="provider_aws.cross_account"></a> [aws.cross\_account](#provider\_aws.cross\_account) | ~> 6.4 |
 
 ## Modules
 
@@ -433,7 +433,7 @@ Please use the [issue tracker](https://github.com/cloudopsworks/terraform-module
 
 ## Copyrights
 
-Copyright © 2024-2025 [Cloud Ops Works LLC](https://cloudops.works)
+Copyright © 2024-2026 [Cloud Ops Works LLC](https://cloudops.works)
 
 
 
