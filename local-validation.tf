@@ -48,9 +48,3 @@ resource "aws_route53_record" "local_cert_validation_addtl" {
   type            = each.value.type
   zone_id         = local.domain_zoneid_map[each.key]
 }
-
-resource "aws_acm_certificate_validation" "local_cert_validation_addtl" {
-  count                   = var.cross_account != true && var.external_dns_zone == false && var.certificate_type == "external" && var.create && length(aws_route53_record.local_cert_validation_addtl) > 0 ? 1 : 0
-  certificate_arn         = aws_acm_certificate.this[0].arn
-  validation_record_fqdns = [for record in aws_route53_record.local_cert_validation_addtl : record.fqdn]
-}
