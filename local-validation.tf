@@ -25,9 +25,12 @@ resource "aws_route53_record" "local_cert_validation" {
 }
 
 resource "aws_acm_certificate_validation" "local_cert_validation" {
-  count                   = var.cross_account != true && var.external_dns_zone == false && var.certificate_type == "external" && var.create ? 1 : 0
-  certificate_arn         = aws_acm_certificate.this[0].arn
-  validation_record_fqdns = [for record in aws_route53_record.local_cert_validation : record.fqdn]
+  count           = var.cross_account != true && var.external_dns_zone == false && var.certificate_type == "external" && var.create ? 1 : 0
+  certificate_arn = aws_acm_certificate.this[0].arn
+  validation_record_fqdns = concat(
+    [for record in aws_route53_record.local_cert_validation : record.fqdn],
+    [for record in aws_route53_record.local_cert_validation_addtl : record.fqdn]
+  )
 }
 
 resource "aws_route53_record" "local_cert_validation_addtl" {
