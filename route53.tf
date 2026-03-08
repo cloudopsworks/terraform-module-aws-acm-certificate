@@ -30,9 +30,10 @@ data "aws_route53_zone" "addtl_local_zone" {
 }
 
 locals {
-  domain_zoneid_map = merge([
+  domain_zoneid_map = tomap(merge([
     for alternate in var.domain_alternates : {
-      for addtl in var.additional_domain_zones : alternate => data.aws_route53_zone.addtl_local_zone[addtl].zone_id if endswith(alternate, addtl) && var.create && var.cross_account != true && var.external_dns_zone == false
+      for addtl in var.additional_domain_zones : alternate => data.aws_route53_zone.addtl_local_zone[addtl].zone_id
+      if endswith(alternate, addtl) && var.create && var.cross_account != true && var.external_dns_zone == false
     }
-  ]...)
+  ]...))
 }
