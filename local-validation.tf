@@ -43,5 +43,5 @@ resource "aws_route53_record" "local_cert_validation_addtl" {
   records         = [each.value.record]
   ttl             = 300
   type            = each.value.type
-  zone_id         = local.domain_zoneid_map[each.value.name]
+  zone_id         = local.domain_zoneid_map[each.key]
 }
