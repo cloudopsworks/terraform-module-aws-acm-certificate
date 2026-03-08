@@ -19,3 +19,20 @@ data "aws_route53_zone" "cross_zone" {
   name         = var.domain_zone
   private_zone = var.private_zone
 }
+
+data "aws_route53_zone" "addtl_local_zone" {
+  for_each = [
+    for additional_domain_zone in var.additional_domain_zones : additional_domain_zone
+    if var.create && var.cross_account != true && var.external_dns_zone == false
+  ]
+  name         = each.key
+  private_zone = var.private_zone
+}
+
+locals {
+  domain_zoneid_map = [
+    for alternate in var.domain_alternates : {
+      for addtl in var.additional_domain_zones : alternate => data.aws_route53_zone.addtl_local_zone[addtl].zone_id if endswith(alternate, addtl) && var.create && var.cross_account != true && var.external_dns_zone == false
+    }
+  ]
+}

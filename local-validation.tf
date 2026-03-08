@@ -19,7 +19,7 @@ resource "aws_route53_record" "local_cert_validation" {
   allow_overwrite = true
   name            = each.value.name
   records         = [each.value.record]
-  ttl             = 60
+  ttl             = 300
   type            = each.value.type
   zone_id         = data.aws_route53_zone.local_zone[0].id
 }
@@ -30,3 +30,18 @@ resource "aws_acm_certificate_validation" "local_cert_validation" {
   validation_record_fqdns = [for record in aws_route53_record.local_cert_validation : record.fqdn]
 }
 
+resource "aws_route53_record" "local_cert_validation_addtl" {
+  for_each = {
+    for dvo in local.domain_validations : dvo.domain_name => {
+      name   = dvo.resource_record_name
+      record = dvo.resource_record_value
+      type   = dvo.resource_record_type
+    } if !endswith(dvo.domain_name, var.domain_zone) && var.cross_account != true && var.external_dns_zone == false && var.certificate_type == "external" && var.create && length(var.additional_domain_zones) > 0
+  }
+  allow_overwrite = true
+  name            = each.value.name
+  records         = [each.value.record]
+  ttl             = 300
+  type            = each.value.type
+  zone_id         = local.domain_zoneid_map[each.value.name]
+}

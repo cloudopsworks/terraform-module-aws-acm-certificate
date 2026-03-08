@@ -60,6 +60,13 @@ variable "domain_alternates" {
   nullable    = false
 }
 
+variable "additional_domain_zones" {
+  description = "Additional domain zones to use for the Certificate domain."
+  type        = set(string)
+  default     = []
+  nullable    = false
+}
+
 variable "cross_account" {
   description = "The cross account to use for the Certificate domain, aws.cross_account provider must be set to module."
   type        = bool
