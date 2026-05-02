@@ -1,18 +1,37 @@
 # Module configuration
-# Required variables
-{{- range .requiredVariables }}
-{{- if ne .Name "org"}}
-# Description {{ .Description }} , Type: {{ .Type }}
-{{ .Name }}: {{ .DefaultValuePlaceholder }}
-{{- end }}
+# AWS ACM certificate deployment inputs
 
-{{- end }}
-# Optional variables
-{{- range .optionalVariables }}
-{{- if ne .Name "is_hub" "spoke_def" "extra_args" }}
-# Description {{ .Description }} , Type: {{ .Type }}
-#{{ .Name }}: {{ .DefaultValue }}
-{{- end }}
+#name: ""                    # (Optional) Explicit ACM resource name. Overrides name_prefix when set. Default: ""
+#name_prefix: "managed-cert" # (Optional) Prefix used when name is empty. Default: "managed-cert"
+#create: true                 # (Optional) Set to false to skip all ACM and Route53 resources. Default: true
 
-{{- end }}
+certificate_type: "external" # (Optional) Certificate mode. Valid values: "external", "internal", "imported". Default: "external"
+domain_zone: "example.com"   # (Required for external/internal) Primary DNS zone used for the certificate. Example: "example.com"
+#domain_alias: "app"         # (Optional) Host label prepended to domain_zone. Example: "app" -> "app.example.com". Default: ""
+#domain_alternates:           # (Optional) Subject Alternative Names (SANs) for the certificate. Default: []
+#  - "*.example.com"
+#additional_domain_zones:     # (Optional) Extra Route53 zones used to validate SANs outside domain_zone. Default: []
+#  - "example.net"
 
+# Cross-account Route53 validation.
+#cross_account:
+#  enabled: false             # (Optional) Enable Route53 lookups/records in another AWS account. Default: false
+#  alias: "cross_account"    # (Optional) AWS provider alias generated in terragrunt.hcl. Default: "cross_account"
+#  region: "us-east-1"       # (Optional) Region for the cross-account AWS provider. Defaults to global-inputs.yaml default.region.
+#  sts_role_arn: "arn:aws:iam::111122223333:role/TerragruntCrossAccountRole" # (Optional) Role assumed for cross-account Route53 access.
+
+#private_zone: false          # (Optional) Set true when the validation zone is a private Route53 hosted zone. Default: false
+#external_dns_zone: false     # (Optional) Set true when DNS validation records are managed outside Route53. Default: false
+
+#imported_cert_secret_name: "" # (Required when certificate_type = "imported") Secrets Manager secret containing base64-encoded keys: key, public_key, cert_chain. Default: ""
+#internal_ca_arn: ""           # (Required when certificate_type = "internal") AWS Private CA ARN used to issue the certificate. Default: ""
+#early_renewal_days: 30         # (Optional) Days before expiry to renew internal certificates. Only used for internal certificates. Default: 0
+
+#options:                     # (Optional) ACM certificate options. Default: {}
+#  certificate_transparency: true # (Optional) Enable certificate transparency logging for eligible public certificates. Default: unset/provider default
+#  exportable: false             # (Optional) Make the certificate exportable when ACM supports it. Default: unset/provider default
+
+#alerts:                      # (Optional) Optional alert settings exposed by the module interface. Default: {}
+#  enabled: false             # (Optional) Enable alert metadata. Default: false
+#  priority: 3                # (Optional) Alert priority/severity. Default: 3
+#  sns_topic_arn: ""         # (Optional) SNS topic ARN recorded in the alert settings. Default: ""

@@ -1,6 +1,14 @@
 name: Terraform ACM Certificate Management
 #logo: logo/logo.jpg
 
+badges:
+  - name: Latest Release
+    image: https://img.shields.io/github/release/cloudopsworks/terraform-module-aws-acm-certificate.svg?style=for-the-badge
+    url: https://github.com/cloudopsworks/terraform-module-aws-acm-certificate/releases/latest
+  - name: Last Updated
+    image: https://img.shields.io/github/last-commit/cloudopsworks/terraform-module-aws-acm-certificate.svg?style=for-the-badge
+    url: https://github.com/cloudopsworks/terraform-module-aws-acm-certificate/commits
+
 license: "APACHE2"
 
 copyrights:
@@ -11,266 +19,254 @@ copyrights:
 github_repo: cloudopsworks/terraform-module-aws-acm-certificate
 
 description: |-
-  AWS Certificate Manager (ACM) Terraform module for comprehensive SSL/TLS certificate management supporting external (DNS validated), imported (from existing certificates), and internal (Private CA) certificate types. Features include cross-account certificate management, local and external DNS validation, automatic validation record creation, and configurable certificate options for transparency and exportability.
+  AWS Certificate Manager (ACM) Terraform module for issuing, importing, and validating
+  SSL/TLS certificates with Route53-aware DNS automation. The module supports public
+  certificates with local or cross-account DNS validation, imported certificates sourced
+  from AWS Secrets Manager, and private certificates issued from AWS Private CA.
 
-# Introduction to the project
 introduction: |-
-  This Terraform module provides a comprehensive solution for managing SSL/TLS certificates in AWS Certificate Manager (ACM). The module offers:
+  This module provides a single ACM workflow that fits the most common certificate
+  delivery patterns used in Cloud Ops Works Terragrunt stacks:
 
-  Certificate Types:
-  - External certificates with automated DNS validation
-  - Imported certificates from external sources (using AWS Secrets Manager)
-  - Internal certificates using AWS Private Certificate Authority
+  - **External ACM certificates** with automatic DNS validation record management.
+  - **Cross-account Route53 validation** by generating an aliased provider block in the
+    scaffolded Terragrunt layer.
+  - **Imported ACM certificates** loaded from AWS Secrets Manager secrets.
+  - **Internal ACM certificates** issued from AWS Private Certificate Authority with
+    optional early renewal windows.
+  - **Multi-domain coverage** through SAN entries and additional validation zones.
+  - **Terragrunt-friendly scaffolding** with generated `terragrunt.hcl`, `inputs.yaml`,
+    and `local-tags.json` files.
 
-  Key Features:
-  - Cross-account certificate management with dedicated provider configuration
-  - Automatic DNS validation record creation in Route53
-  - Support for both local and external DNS zones
-  - Multiple domain validation with SAN support
-  - Configurable certificate transparency logging
-  - Certificate exportability options
-  - Early renewal configuration for internal certificates
-
-# How to use this project
 usage: |-
-  Module Configuration Variables:
+  ### Terragrunt Scaffolding Workflow
 
-  ```yaml
-  create:
-    description: "Flag to control resource creation"
-    type: bool
-    default: true
+  Use Terragrunt scaffold to bootstrap a deployment directory from this module's
+  `.boilerplate/` template.
 
-  certificate_type:
-    description: "Type of certificate (external/imported/internal)"
-    type: string
-    required: true
+  ```sh
+  # 1. Create and enter the target deployment directory
+  mkdir -p <environment>/<region>/<spoke>/acm-certificate
+  cd <environment>/<region>/<spoke>/acm-certificate
 
-  domain_zone:
-    description: "Main domain zone for the certificate"
-    type: string
-    required: true
+  # 2. Scaffold the module (do NOT use --working-dir)
+  terragrunt scaffold github.com/cloudopsworks/terraform-module-aws-acm-certificate
 
-  domain_alias:
-    description: "Subdomain prefix for the certificate"
-    type: string
-    default: ""
+  # 3. Edit inputs.yaml with deployment-specific values
+  vi inputs.yaml
 
-  domain_alternates:
-    description: "List of Subject Alternative Names (SANs)"
-    type: list(string)
-    default: []
-
-  cross_account:
-    description: "Enable cross-account certificate management"
-    type: bool
-    default: false
-
-  external_dns_zone:
-    description: "Flag for external DNS zone management"
-    type: bool
-    default: false
-
-  imported_cert_secret_name:
-    description: "AWS Secrets Manager secret name for imported certificate"
-    type: string
-    default: ""
-
-  internal_ca_arn:
-    description: "ARN of Private Certificate Authority for internal certificates"
-    type: string
-    default: ""
-
-  early_renewal_days:
-    description: "Number of days before certificate expiry to trigger renewal"
-    type: number
-    default: 0
-
-  options:
-    description: "Certificate configuration options"
-    type: map
-    default: {}
-    fields:
-      certificate_transparency:
-        description: "Enable/disable certificate transparency logging"
-        type: bool
-      exportable:
-        description: "Enable/disable certificate export capability"
-        type: bool
+  # 4. Apply
+  terragrunt apply
   ```
 
-  Terragrunt Configuration:
+  ### Generated `inputs.yaml`
+
+  After scaffolding, Terragrunt generates an `inputs.yaml` file with the module-specific
+  inputs below:
+
+  ```yaml
+  #name: ""                    # (Optional) Explicit ACM resource name. Overrides name_prefix when set. Default: ""
+  #name_prefix: "managed-cert" # (Optional) Prefix used when name is empty. Default: "managed-cert"
+  #create: true                 # (Optional) Set to false to skip all ACM and Route53 resources. Default: true
+
+  certificate_type: "external" # (Optional) Certificate mode. Valid values: "external", "internal", "imported". Default: "external"
+  domain_zone: "example.com"   # (Required for external/internal) Primary DNS zone used for the certificate. Example: "example.com"
+  #domain_alias: "app"         # (Optional) Host label prepended to domain_zone. Example: "app" -> "app.example.com". Default: ""
+  #domain_alternates:           # (Optional) Subject Alternative Names (SANs) for the certificate. Default: []
+  #  - "*.example.com"
+  #additional_domain_zones:     # (Optional) Extra Route53 zones used to validate SANs outside domain_zone. Default: []
+  #  - "example.net"
+
+  # Cross-account Route53 validation.
+  #cross_account:
+  #  enabled: false             # (Optional) Enable Route53 lookups/records in another AWS account. Default: false
+  #  alias: "cross_account"    # (Optional) AWS provider alias generated in terragrunt.hcl. Default: "cross_account"
+  #  region: "us-east-1"       # (Optional) Region for the cross-account AWS provider. Defaults to global-inputs.yaml default.region.
+  #  sts_role_arn: "arn:aws:iam::111122223333:role/TerragruntCrossAccountRole" # (Optional) Role assumed for cross-account Route53 access.
+
+  #private_zone: false          # (Optional) Set true when the validation zone is a private Route53 hosted zone. Default: false
+  #external_dns_zone: false     # (Optional) Set true when DNS validation records are managed outside Route53. Default: false
+
+  #imported_cert_secret_name: "" # (Required when certificate_type = "imported") Secrets Manager secret containing base64-encoded keys: key, public_key, cert_chain. Default: ""
+  #internal_ca_arn: ""           # (Required when certificate_type = "internal") AWS Private CA ARN used to issue the certificate. Default: ""
+  #early_renewal_days: 30         # (Optional) Days before expiry to renew internal certificates. Only used for internal certificates. Default: 0
+
+  #options:                     # (Optional) ACM certificate options. Default: {}
+  #  certificate_transparency: true # (Optional) Enable certificate transparency logging for eligible public certificates. Default: unset/provider default
+  #  exportable: false             # (Optional) Make the certificate exportable when ACM supports it. Default: unset/provider default
+
+  #alerts:                      # (Optional) Optional alert settings exposed by the module interface. Default: {}
+  #  enabled: false             # (Optional) Enable alert metadata. Default: false
+  #  priority: 3                # (Optional) Alert priority/severity. Default: 3
+  #  sns_topic_arn: ""         # (Optional) SNS topic ARN recorded in the alert settings. Default: ""
+  ```
+
+  ### Generated `terragrunt.hcl`
+
+  The scaffold also renders a `terragrunt.hcl` that loads `inputs.yaml`, derives the
+  cross-account provider settings, and maps the file into module inputs:
+
   ```hcl
-  include {
-    path = find_in_parent_folders()
+  locals {
+    local_vars  = yamldecode(file("./inputs.yaml"))
+    spoke_vars  = yamldecode(file(find_in_parent_folders("spoke-inputs.yaml")))
+    region_vars = yamldecode(file(find_in_parent_folders("region-inputs.yaml")))
+    env_vars    = yamldecode(file(find_in_parent_folders("env-inputs.yaml")))
+    global_vars = yamldecode(file(find_in_parent_folders("global-inputs.yaml")))
+
+    local_tags  = jsondecode(file("./local-tags.json"))
+    spoke_tags  = jsondecode(file(find_in_parent_folders("spoke-tags.json")))
+    region_tags = jsondecode(file(find_in_parent_folders("region-tags.json")))
+    env_tags    = jsondecode(file(find_in_parent_folders("env-tags.json")))
+    global_tags = jsondecode(file(find_in_parent_folders("global-tags.json")))
+
+    cross_account              = try(local.local_vars.cross_account.enabled, false)
+    cross_account_alias        = try(local.local_vars.cross_account.alias, "cross_account")
+    cross_account_region       = try(local.local_vars.cross_account.region, local.global_vars.default.region)
+    cross_account_sts_role_arn = try(local.local_vars.cross_account.sts_role_arn, local.global_vars.default.sts_role_arn)
+
+    tags = merge(
+      local.global_tags,
+      local.env_tags,
+      local.region_tags,
+      local.spoke_tags,
+      local.local_tags
+    )
+  }
+
+  include "root" {
+    path = find_in_parent_folders("root.hcl")
+  }
+
+  generate "provider_l" {
+    path        = "provider.l.tf"
+    if_exists   = "overwrite_terragrunt"
+    if_disabled = "remove_terragrunt"
+    contents    = <<EOF_PROVIDER
+  provider "aws" {
+    alias  = "${local.cross_account_alias}"
+    region = "${local.cross_account_region}"
+
+    assume_role {
+      role_arn     = "${local.cross_account_sts_role_arn}"
+      session_name = "terragrunt"
+    }
+  }
+  EOF_PROVIDER
   }
 
   terraform {
-    source = "git::https://github.com/cloudopsworks/terraform-module-aws-acm-certificate.git?ref=v1.0.0"
-  }
-  
-  
-  # Generate global cross_account provider block
-  generate "provider_l" {
-    path = "provider.l.tf"
-    #   disable     = !local.cross_account
-    if_exists   = "overwrite_terragrunt"
-    if_disabled = "remove_terragrunt"
-    contents    = <<EOF
-    provider "aws" {
-      alias = "${local.cross_account_alias}"
-      region = "${local.cross_account_region}"
-      assume_role {
-        role_arn     = "${local.cross_account_sts_role_arn}"
-        session_name = "terragrunt"
-      }
-    }
-    EOF
+    source = "git::https://github.com/cloudopsworks/terraform-module-aws-acm-certificate.git?ref=v1.3.5"
   }
 
   inputs = {
-    certificate_type = "external"
-    domain_zone     = "example.com"
-    domain_alias    = "app"
-    domain_alternates = ["*.app.example.com"]
+    is_hub    = false
+    org       = local.env_vars.org
+    spoke_def = local.spoke_vars.spoke
 
-    options = {
-      certificate_transparency = true
-      exportable = false
-    }
+    certificate_type        = local.local_vars.certificate_type
+    domain_zone             = local.local_vars.domain_zone
+    domain_alias            = try(local.local_vars.domain_alias, "")
+    domain_alternates       = try(local.local_vars.domain_alternates, [])
+    additional_domain_zones = try(local.local_vars.additional_domain_zones, [])
+    create                  = try(local.local_vars.create, true)
+    external_dns_zone       = try(local.local_vars.external_dns_zone, false)
+    imported_cert_secret_name = try(local.local_vars.imported_cert_secret_name, "")
+    internal_ca_arn         = try(local.local_vars.internal_ca_arn, "")
+    early_renewal_days      = try(local.local_vars.early_renewal_days, 0)
+    name                    = try(local.local_vars.name, "")
+    name_prefix             = try(local.local_vars.name_prefix, "managed-cert")
+    options                 = try(local.local_vars.options, {})
+    alerts                  = try(local.local_vars.alerts, {})
+    private_zone            = try(local.local_vars.private_zone, false)
+
+    cross_account = local.cross_account
+    extra_tags    = local.tags
   }
   ```
 
-# Example usage
 examples: |-
-  External Certificate with Local DNS Validation:
-  ```hcl
-  module "external_certificate" {
-    source = "cloudopsworks/terraform-module-aws-acm-certificate"
+  ### External certificate with Route53 validation
 
-    certificate_type = "external"
-    domain_zone     = "example.com"
-    domain_alias    = "api"
-    domain_alternates = ["*.api.example.com"]
-    cross_account   = false
-    external_dns_zone = false
-
-    options = {
-      certificate_transparency = true
-      exportable = false
-    }
-  }
+  ```yaml
+  certificate_type: "external"
+  domain_zone: "example.com"
+  domain_alias: "app"
+  domain_alternates:
+    - "*.app.example.com"
+  options:
+    certificate_transparency: true
+    exportable: false
   ```
 
-  Cross-Account Certificate:
-  ```hcl
-  module "cross_account_cert" {
-    source = "cloudopsworks/terraform-module-aws-acm-certificate"
-    providers = {
-      aws.cross_account = aws.dns_account
-    }
+  ### Cross-account Route53 validation
 
-    certificate_type = "external"
-    domain_zone     = "example.com"
-    domain_alias    = "app"
-    cross_account   = true
-    domain_alternates = ["api.example.com"]
-
-    options = {
-      certificate_transparency = true
-      exportable = true
-    }
-  }
+  ```yaml
+  certificate_type: "external"
+  domain_zone: "example.com"
+  domain_alias: "api"
+  cross_account:
+    enabled: true
+    alias: "dns_account"
+    region: "us-east-1"
+    sts_role_arn: "arn:aws:iam::111122223333:role/TerragruntCrossAccountRole"
+  domain_alternates:
+    - "api.example.net"
+  additional_domain_zones:
+    - "example.net"
   ```
 
-  Imported Certificate from Secrets Manager:
-  ```hcl
-  module "imported_cert" {
-    source = "cloudopsworks/terraform-module-aws-acm-certificate"
+  ### Imported certificate from Secrets Manager
 
-    certificate_type = "imported"
-    domain_zone     = "example.com"
-    imported_cert_secret_name = "imported/wildcard-cert"
-
-    options = {
-      certificate_transparency = false
-      exportable = true
-    }
-  }
+  ```yaml
+  certificate_type: "imported"
+  domain_zone: "example.com"
+  imported_cert_secret_name: "/platform/shared/acm/wildcard-example-com"
+  options:
+    exportable: true
   ```
 
-  Internal Certificate with Private CA:
-  ```hcl
-  module "internal_cert" {
-    source = "cloudopsworks/terraform-module-aws-acm-certificate"
+  ### Internal certificate from AWS Private CA
 
-    certificate_type = "internal"
-    domain_zone     = "internal.example.com"
-    domain_alias    = "service"
-    internal_ca_arn = "arn:aws:acm-pca:region:account:certificate-authority/12345678-1234-1234-1234-123456789012"
-    early_renewal_days = 30
-
-    options = {
-      certificate_transparency = false
-      exportable = true
-    }
-  }
+  ```yaml
+  certificate_type: "internal"
+  domain_zone: "internal.example.com"
+  domain_alias: "service"
+  internal_ca_arn: "arn:aws:acm-pca:us-east-1:111122223333:certificate-authority/12345678-1234-1234-1234-123456789012"
+  early_renewal_days: 30
+  options:
+    exportable: true
   ```
 
-# How to get started quickly
 quickstart: |-
-  1. Create a Terragrunt configuration file (terragrunt.hcl):
-     ```hcl
-     include {
-       path = find_in_parent_folders()
-     }
-
-     terraform {
-       source = "git::https://github.com/cloudopsworks/terraform-module-aws-acm-certificate.git?ref=v1.0.0"
-     }
-
-     inputs = {
-       certificate_type = "external"
-       domain_zone     = "example.com"
-       domain_alias    = "app"
-       domain_alternates = ["*.app.example.com"]
-
-       options = {
-         certificate_transparency = true
-         exportable = false
-       }
-     }
+  1. Create a Terragrunt deployment directory and scaffold the module:
+     ```sh
+     mkdir -p prod/us-east-1/spoke-001/acm-certificate
+     cd prod/us-east-1/spoke-001/acm-certificate
+     terragrunt scaffold github.com/cloudopsworks/terraform-module-aws-acm-certificate
      ```
 
-  2. For cross-account setup, configure the provider (provider.tf):
-     ```hcl
-     provider "aws" {
-       alias = "cross_account"
-       assume_role {
-         role_arn = "arn:aws:iam::ACCOUNT_ID:role/CrossAccountRole"
-       }
-     }
-     ```
+  2. Edit `inputs.yaml` for your certificate type:
+     - Set `certificate_type` to `external`, `imported`, or `internal`
+     - Set `domain_zone` and optional `domain_alias` / `domain_alternates`
+     - For `imported`, set `imported_cert_secret_name`
+     - For `internal`, set `internal_ca_arn` and optional `early_renewal_days`
+     - For cross-account DNS validation, define the `cross_account` object
 
-  3. Initialize Terragrunt:
-     ```bash
-     terragrunt init
-     ```
-
-  4. Review the planned changes:
-     ```bash
+  3. Review the plan:
+     ```sh
      terragrunt plan
      ```
 
-  5. Apply the configuration:
-     ```bash
+  4. Apply the configuration:
+     ```sh
      terragrunt apply
      ```
 
-  6. Monitor certificate status:
-     - For external certificates: Check Route53 for validation records
-     - For imported certificates: Verify secret in Secrets Manager
-     - For internal certificates: Monitor Private CA for issuance
+  5. Monitor validation/issuance:
+     - External certificates: ensure DNS validation records propagate
+     - Imported certificates: verify the Secrets Manager payload contains `key`, `public_key`, and `cert_chain`
+     - Internal certificates: verify the referenced Private CA is active and authorized
 
 include:
   - "docs/targets.md"

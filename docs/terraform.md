@@ -67,8 +67,8 @@
 
 | Name | Description |
 |------|-------------|
-| <a name="output_acm_certificate_arn"></a> [acm\_certificate\_arn](#output\_acm\_certificate\_arn) | n/a |
-| <a name="output_acm_certificate_expire_date"></a> [acm\_certificate\_expire\_date](#output\_acm\_certificate\_expire\_date) | n/a |
-| <a name="output_acm_certificate_renewal_elegibility"></a> [acm\_certificate\_renewal\_elegibility](#output\_acm\_certificate\_renewal\_elegibility) | n/a |
-| <a name="output_acm_certificate_status"></a> [acm\_certificate\_status](#output\_acm\_certificate\_status) | n/a |
-| <a name="output_acm_certificate_validation_options"></a> [acm\_certificate\_validation\_options](#output\_acm\_certificate\_validation\_options) | n/a |
+| <a name="output_acm_certificate_arn"></a> [acm\_certificate\_arn](#output\_acm\_certificate\_arn) | ARN of the ACM certificate created or imported by this module. |
+| <a name="output_acm_certificate_expire_date"></a> [acm\_certificate\_expire\_date](#output\_acm\_certificate\_expire\_date) | Certificate expiration timestamp reported by ACM. |
+| <a name="output_acm_certificate_renewal_elegibility"></a> [acm\_certificate\_renewal\_elegibility](#output\_acm\_certificate\_renewal\_elegibility) | ACM renewal eligibility state for the managed certificate. |
+| <a name="output_acm_certificate_status"></a> [acm\_certificate\_status](#output\_acm\_certificate\_status) | Current ACM certificate status returned by AWS. |
+| <a name="output_acm_certificate_validation_options"></a> [acm\_certificate\_validation\_options](#output\_acm\_certificate\_validation\_options) | Domain validation records to publish when using external DNS automation for public certificates. |
